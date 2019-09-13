@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "---\ntitle: \"antibioticos\"\noutput: html_document\n---\n\n```{r setup, include=FALSE}\nknitr::opts_chunk$set(echo = TRUE)\nlibrary(readr)\nlibrary(ggplot2)\nlibrary(plyr)\nlibrary( reshape )\nlibrary(data.table)\n\n```\n\n## Presence of antibiotic genes in BGCs \n\n\nMethodology\nFamilies of CARD\nHomology search was conducted using blast (e-vaule )all vs all were Antibiotic resistance genes from The Comprehensive Antibiotic Resistance Database (CARD) where blasted all vs all \nFastOrtho \n\nHomology searches between CARD and MIBiG \nblast CARD vs MiBIG\nblast MiBiG bs CARD\n\n¿How many BGCs contain an AR gene?\n¿How many families of AR genes are present in BGC?\nWhich families are over represented\nHow many BGCs per AR gene/Family\n\n# Protein families in CARD  \n```{r FO_families_CARD}\nCAARD_file=\"CARD.FO.families\"\nCARDFamiliesTable <- read_delim(CAARD_file, \"\\t\", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)\ncolnames(CARDFamiliesTable)=c(\"Gen_ID_CARD\",\"FO_Family\")\nhead(CARDFamiliesTable)\n#Gen_Id, Familia (según fastOrtho)\n#Cada renglón es una ocurrencia de un gen de la familia 1\nCARDFamiliesTable$Ordenado<-factor(CARDFamiliesTable$FO_Family, unique(as.character(CARDFamiliesTable$FO_Family)))\n\nCARD_Frequency<-count(CARDFamiliesTable, vars = \"FO_Family\")\ntail(CARD_Frequency)\n\nsetDT(CARD_Frequency)[,frequencie := .N, by =\"freq\"]\nsortCARD<-CARD_Frequency[order(frequencie, decreasing = T),]\nhead(sortCARD)\n\ntail(CARD_Frequency)\n\nCARD_Frequency_5 <- CARD_Frequency[1:2,]\nCARD_Frequency_5\nggplot(CARDFamiliesTable, aes(x=FO_Family)) +stat_count(width = 0.5)\n\n\nggplot(CARD_Frequency_5,aes(x=FO_Family,y=CARD_Frequency_5$freq))\n#+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab(\"Gene families\")+ylab(\"Number of domains\")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = \"none\",panel.background = element_rect(fill = \"white\",colour = \"grey50\"))\np\n#p+theme(plot.margin = unit(c(1,1,1.5,1.2),\"cm\"))\n#ggsave(\"DomainDistro1-20first.svg\",plot = p,width=30,height = 15,units = \"cm\")\n```\n\n# BGC clases in MiBIG  \n```{r MiBIG}\nMIBiG_file=\"MiBIG_DB.faa.meta\"\nMIBiGTable <- read_delim(MIBiG_file, \"\\t\", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)\n#Gen_Id, Familia (según fastOrtho)\n#Cada renglón es una ocurrencia de un gen de la familia 1\ncolnames(MIBiGTable)=c(\"BGC_ID\",\"compound\",\"class\",\"source\",\"phylum\",\"kingdom\",\"completness\")\nhead(MIBiGTable)\nMIBiGTable$Ordenado<-factor(MIBiGTable$class, unique(as.character(MIBiGTable$class)))\np<-ggplot(MIBiGTable,aes(x=Ordenado,y=BGC_ID,fill=class))+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab(\"Gene families\")+ylab(\"Number of domains\")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = \"none\",panel.background = element_rect(fill = \"white\",colour = \"grey50\"))\np\np+theme(plot.margin = unit(c(1,1,1.5,1.2),\"cm\"))\nggsave(\"DomainDistro1-20first.svg\",plot = p,width=30,height = 15,units = \"cm\")\n\n```\n\n# Interaction CARD - MiBIG  \n```{r CAARD_vs_MiBIG }\nCAARD_vs_MIBiG_file=\"CARDquery.blast1\"\nCARD_vs_MIBiGTable <- read_delim(CAARD_vs_MIBiG_file, \"\\t\", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)\n#Cada renglón es una ocurrencia de un gen de la familia 1\ncolnames(CARD_vs_MIBiGTable)=c(\"Gen_ID_CARD\",\"CARD_SOURCE\",\"BGC_ID\",\"MIBIG_annotation\",\"MIBIG_gen_Id\")\nhead(CARD_vs_MIBiGTable)\n```\n\nwhich CAARD families are over represented in MiBiG\nwhich MiBiG classes are over represented as CARD hits",
+    "created" : 1568331256276.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3290068355",
+    "id" : "C61C6D52",
+    "lastKnownWriteTime" : 1568393798,
+    "last_content_update" : 1568393798597,
+    "path" : "/media/strain/disco2/antibioticos/BLAST/antibioticos/CARDmyBIG.Rmd",
+    "project_path" : "CARDmyBIG.Rmd",
+    "properties" : {
+        "last_setup_crc32" : "B0BC728De9a60126",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

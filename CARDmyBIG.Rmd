@@ -9,6 +9,7 @@ library(readr)
 library(ggplot2)
 library(plyr)
 library( reshape )
+library(data.table)
 
 ```
 
@@ -29,18 +30,61 @@ blast MiBiG bs CARD
 Which families are over represented
 How many BGCs per AR gene/Family
 
-```{r cars}
-file="CARD.FO.families"
-
-
-CARDFamiliesTable <- read_delim(file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+# Protein families in CARD  
+```{r FO_families_CARD}
+CAARD_file="CARD.FO.families"
+CARDFamiliesTable <- read_delim(CAARD_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+colnames(CARDFamiliesTable)=c("Gen_ID_CARD","FO_Family")
 head(CARDFamiliesTable)
-#Familia1 numDominios
+#Gen_Id, Familia (según fastOrtho)
 #Cada renglón es una ocurrencia de un gen de la familia 1
-#colnames(FIRSTmissionTable)=c("family","domains_number")
-#FIRSTmissionTable$Ordenado<-factor(FIRSTmissionTable$family, unique(as.character(FIRSTmissionTable$family)))
-#p<-ggplot(FIRSTmissionTable,aes(x=Ordenado,y=domains_number,fill=family))+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab("Gene families")+ylab("Number of domains")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = "none",panel.background = element_rect(fill = "white",colour = "grey50"))
-#p
+CARDFamiliesTable$Ordenado<-factor(CARDFamiliesTable$FO_Family, unique(as.character(CARDFamiliesTable$FO_Family)))
+
+CARD_Frequency<-count(CARDFamiliesTable, vars = "FO_Family")
+tail(CARD_Frequency)
+
+setDT(CARD_Frequency)[,frequencie := .N, by ="freq"]
+sortCARD<-CARD_Frequency[order(frequencie, decreasing = T),]
+head(sortCARD)
+
+tail(CARD_Frequency)
+
+CARD_Frequency_5 <- CARD_Frequency[1:2,]
+CARD_Frequency_5
+ggplot(CARDFamiliesTable, aes(x=FO_Family)) +stat_count(width = 0.5)
+
+
+ggplot(CARD_Frequency_5,aes(x=FO_Family,y=CARD_Frequency_5$freq))
+#+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab("Gene families")+ylab("Number of domains")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = "none",panel.background = element_rect(fill = "white",colour = "grey50"))
+p
 #p+theme(plot.margin = unit(c(1,1,1.5,1.2),"cm"))
 #ggsave("DomainDistro1-20first.svg",plot = p,width=30,height = 15,units = "cm")
 ```
+
+# BGC clases in MiBIG  
+```{r MiBIG}
+MIBiG_file="MiBIG_DB.faa.meta"
+MIBiGTable <- read_delim(MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+#Gen_Id, Familia (según fastOrtho)
+#Cada renglón es una ocurrencia de un gen de la familia 1
+colnames(MIBiGTable)=c("BGC_ID","compound","class","source","phylum","kingdom","completness")
+head(MIBiGTable)
+MIBiGTable$Ordenado<-factor(MIBiGTable$class, unique(as.character(MIBiGTable$class)))
+p<-ggplot(MIBiGTable,aes(x=Ordenado,y=BGC_ID,fill=class))+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab("Gene families")+ylab("Number of domains")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = "none",panel.background = element_rect(fill = "white",colour = "grey50"))
+p
+p+theme(plot.margin = unit(c(1,1,1.5,1.2),"cm"))
+ggsave("DomainDistro1-20first.svg",plot = p,width=30,height = 15,units = "cm")
+
+```
+
+# Interaction CARD - MiBIG  
+```{r CAARD_vs_MiBIG }
+CAARD_vs_MIBiG_file="CARDquery.blast1"
+CARD_vs_MIBiGTable <- read_delim(CAARD_vs_MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+#Cada renglón es una ocurrencia de un gen de la familia 1
+colnames(CARD_vs_MIBiGTable)=c("Gen_ID_CARD","CARD_SOURCE","BGC_ID","MIBIG_annotation","MIBIG_gen_Id")
+head(CARD_vs_MIBiGTable)
+```
+
+which CAARD families are over represented in MiBiG
+which MiBiG classes are over represented as CARD hits
