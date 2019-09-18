@@ -10,7 +10,9 @@ library(ggplot2)
 library(plyr)
 library( reshape )
 library(data.table)
+library(easyGgplot2)
 
+library(dplyr)
 ```
 
 ## Presence of antibiotic genes in BGCs 
@@ -30,60 +32,89 @@ blast MiBiG bs CARD
 Which families are over represented
 How many BGCs per AR gene/Family
 
+
+
 # Protein families in CARD  
+The following figure shows the most populated families in CARD database.
 ```{r FO_families_CARD}
 CAARD_file="CARD.FO.families"
 CARDFamiliesTable <- read_delim(CAARD_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-colnames(CARDFamiliesTable)=c("Gen_ID_CARD","FO_Family")
+colnames(CARDFamiliesTable)=c("Gen_ID_CARD","secondary_ID_CARD","FO_Family")
 head(CARDFamiliesTable)
 #Gen_Id, Familia (según fastOrtho)
-#Cada renglón es una ocurrencia de un gen de la familia 1
-CARDFamiliesTable$Ordenado<-factor(CARDFamiliesTable$FO_Family, unique(as.character(CARDFamiliesTable$FO_Family)))
+#Cada renglón es una ocurrencia de un gen de la familia 
+CARDFamiliesTable$FO_Family
 
-CARD_Frequency<-count(CARDFamiliesTable, vars = "FO_Family")
-tail(CARD_Frequency)
-
-setDT(CARD_Frequency)[,frequencie := .N, by ="freq"]
-sortCARD<-CARD_Frequency[order(frequencie, decreasing = T),]
-head(sortCARD)
-
-tail(CARD_Frequency)
-
-CARD_Frequency_5 <- CARD_Frequency[1:2,]
-CARD_Frequency_5
-ggplot(CARDFamiliesTable, aes(x=FO_Family)) +stat_count(width = 0.5)
-
-
-ggplot(CARD_Frequency_5,aes(x=FO_Family,y=CARD_Frequency_5$freq))
-#+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab("Gene families")+ylab("Number of domains")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = "none",panel.background = element_rect(fill = "white",colour = "grey50"))
-p
-#p+theme(plot.margin = unit(c(1,1,1.5,1.2),"cm"))
-#ggsave("DomainDistro1-20first.svg",plot = p,width=30,height = 15,units = "cm")
+sortCARD<-CARDFamiliesTable %>% group_by(FO_Family) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+First_10<-sortCARD[1:784,]
+tail(First_10)
+ggplot(First_10, aes(FO_Family))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=15),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 30,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
 ```
+These first five families, in a preliminar search corresponds to:
+|  Family	| Annotation  	|
+|---	|---	|
+| Family 0 	|  	|
+| Family 1  	|  	|
+| Family 2	|  	|
+| Family 3 	|  	|
+| Family 4 	|  	|
+
 
 # BGC clases in MiBIG  
+The following figure shows the most populated classes in MiBIG database.
+
 ```{r MiBIG}
 MIBiG_file="MiBIG_DB.faa.meta"
 MIBiGTable <- read_delim(MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 #Gen_Id, Familia (según fastOrtho)
 #Cada renglón es una ocurrencia de un gen de la familia 1
-colnames(MIBiGTable)=c("BGC_ID","compound","class","source","phylum","kingdom","completness")
+colnames(MIBiGTable)=c("BGC_ID","compound","clase","source","phylum","kingdom","completness")
 head(MIBiGTable)
-MIBiGTable$Ordenado<-factor(MIBiGTable$class, unique(as.character(MIBiGTable$class)))
-p<-ggplot(MIBiGTable,aes(x=Ordenado,y=BGC_ID,fill=class))+geom_boxplot(outlier.shape = NA)+geom_jitter(width=0.28,alpha=0.028)+xlab("Gene families")+ylab("Number of domains")+theme(axis.text.x = element_text(size = 6))+theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),legend.position = "none",panel.background = element_rect(fill = "white",colour = "grey50"))
-p
-p+theme(plot.margin = unit(c(1,1,1.5,1.2),"cm"))
-ggsave("DomainDistro1-20first.svg",plot = p,width=30,height = 15,units = "cm")
+
+sortMIBiG<-MIBiGTable %>% group_by(clase) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+#First_10_MIBiG<-sortMIBiG[1:784,]
+#head(First_10_MIBiG)
+ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=15),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
+
 
 ```
 
 # Interaction CARD - MiBIG  
+The following figure shows which CARD families are the most  populated classes in MiBIG database.
+
 ```{r CAARD_vs_MiBIG }
-CAARD_vs_MIBiG_file="CARDquery.blast1"
-CARD_vs_MIBiGTable <- read_delim(CAARD_vs_MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+CARD_vs_MIBiG_file="CARDquery.blast1"
+CARD_vs_MIBiGTable <- read_delim(CARD_vs_MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 #Cada renglón es una ocurrencia de un gen de la familia 1
 colnames(CARD_vs_MIBiGTable)=c("Gen_ID_CARD","CARD_SOURCE","BGC_ID","MIBIG_annotation","MIBIG_gen_Id")
 head(CARD_vs_MIBiGTable)
+
+#CARDFamiliesTable$FO_Family[CARDFamiliesTable$Gen_ID_CARD %in% c("ACT97415.1")]
+
+#CARDFamiliesTable$FO_Family[CARDFamiliesTable$Gen_ID_CARD %in% c(CARDFamiliesTable$Gen_ID_CARD)]
+#CARDFamiliesTable$Gen_ID_CARD %in% c("ACT97415.1")
+
+CARD_vs_MIBiGTable$CARD_FO<-CARDFamiliesTable$FO_Family[CARD_vs_MIBiGTable$Gen_ID_CARD %in% c(CARDFamiliesTable$Gen_ID_CARD)]
+
+
 ```
 
 which CAARD families are over represented in MiBiG
