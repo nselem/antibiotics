@@ -36,7 +36,7 @@ In the following sections we will refer to the following questions: How many BGC
 
 # Protein families in CARD  
 The following figure shows the most populated families in CARD database.
-```{r FO_reading_families_CARD, echo=FALSE}
+```{r FO_reading_families_CARD, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE}
 CAARD_file="CARD.FO.families"
 CARDFamiliesTable <- read_delim(CAARD_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 colnames(CARDFamiliesTable)=c("Gen_ID_CARD","secondary_ID_CARD","FO_Family")
@@ -63,56 +63,64 @@ These first five families, in a preliminar search corresponds to:
   
 
 
-```{r FO_families_CARD, echo=FALSE}
+```{r FO_families_CARD, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE}
 #Cada renglón es una ocurrencia de un gen de la familia 
 #CARDFamiliesTable$FO_Family
 sortCARD<-CARDFamiliesTable %>% group_by(FO_Family) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
 First_10<-sortCARD[1:784,]
 tail(First_10)
-ggplot(First_10, aes(FO_Family))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
+CARD_bars<-ggplot(First_10, aes(FO_Family))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
                                     lineheight=1.2),  # title
-            axis.title.y=element_text(size=15),  # Y axis title
-            axis.text.x=element_text(size=10, 
+            axis.title.y=element_text(size=35),  # Y axis title
+            axis.text.x=element_text(size=30, 
                                      angle = 30,
                                      vjust=.5),  # X axis text
-            axis.text.y=element_text(size=10))  # Y axis text
+            axis.text.y=element_text(size=30))  # Y axis text
+ggsave(file="CARD_bars.png", plot=CARD_bars, width=30, height=15)
+
 ```
+
+![CARD families](CARD_bars.png)  
 
 
 # BGC clases in MiBIG  
 The following figure shows the most populated classes in MiBIG database.
 
-```{r MiBIG, echo=FALSE}
+```{r MiBIG, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE}
 MIBiG_file="data/MiBIG_DB.faa.meta"
 MIBiGTable <- read_delim(MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 #Gen_Id, Familia (según fastOrtho)
 #Cada renglón es una ocurrencia de un gen de la familia 1
 colnames(MIBiGTable)=c("BGC_ID","compound","clase","source","phylum","kingdom","completness")
-head(MIBiGTable)
+BGCs<-length(unique(MIBiGTable$BGC_ID))
 
 sortMIBiG<-MIBiGTable %>% group_by(clase) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
 #First_10_MIBiG<-sortMIBiG[1:784,]
 #head(First_10_MIBiG)
-ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
+BIG_classes<-ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
                                     lineheight=1.2),  # title
-            axis.title.y=element_text(size=15),  # Y axis title
-            axis.text.x=element_text(size=10, 
+            axis.title.y=element_text(size=30),  # Y axis title
+            axis.text.x=element_text(size=30, 
                                      angle = 90,
                                      vjust=.5),  # X axis text
-            axis.text.y=element_text(size=10))  # Y axis text
+            axis.text.y=element_text(size=30))  # Y axis text
 
+ggsave(file="BIG_classes.png", plot=BIG_classes, width=30, height=15)
 
 ```
-  
-|Elements | MIBiG class |  
-|--- |---  |  
-|39|Alkaloid|    
+![MIBiG classes](BIG_classes.png)  
+
+There are `r BGCs` different BGCs reported at MIBiG distributed in several classes as indicated in the following table.   
+    
+|Elements | MIBiG class |   
+|--- |---  |    
+|39|Alkaloid|      
 |3|Alkaloid-NRP|  
 |2|Alkaloid-NRP-Polyketide|  
 |1|Alkaloid-NRP-Terpene|  
@@ -142,12 +150,12 @@ ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count")+ theme(plot.title=el
 # Interaction CARD - MiBIG  
 The following figure shows the average of CARD families by MIBiG classes
 
-```{r CAARD_vs_MiBIG, echo=FALSE }
+```{r CAARD_vs_MiBIG, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
 CARD_vs_MIBiG_file="CARDquery.blast1"
 CARD_vs_MIBiGTable <- read_delim(CARD_vs_MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 #Cada renglón es una ocurrencia de un gen de la familia 1
 colnames(CARD_vs_MIBiGTable)=c("Gen_ID_CARD","CARD_SOURCE","BGC_ID","MIBIG_annotation","MIBIG_gen_Id")
-head(CARD_vs_MIBiGTable)
+BGC_w_CARD<-length(unique(CARD_vs_MIBiGTable$BGC_ID))
 
 ### Merging all tables in one
 CARD_MIBiG_class<-merge(CARD_vs_MIBiGTable, MIBiGTable, by, by.x="BGC_ID", by.y="BGC_ID", sort = TRUE)
@@ -157,6 +165,19 @@ CARD_MIBiG_clas2<-merge(CARD_MIBiG_class, CARDFamiliesTable, by, by.x="Gen_ID_CA
 ## First of all, how many BGCs contain a hit in CARD 
 ## Count uniq BGCs
 
+ggplot(CARD_MIBiG_clas2,aes(clase)) + geom_bar(aes(fill=FO_Family), width = 0.5)
++ theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=10),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
+
+#+ geom_bar(aes(fill=FO_Family), width = 0.5)
 
 ## Counting CARD FastOrthoFamilies per BGC
 cuentas<-count(CARD_MIBiG_clas2 %>% group_by(BGC_ID,FO_Family) %>% tally())
@@ -171,14 +192,28 @@ head (Clas_BGC_Count,100)
 theme_set(theme_classic())
 
 
-ggplot(Clas_BGC_Count,aes(x = clase, y = cuentas))+ geom_boxplot() + theme(axis.text.x = element_text(angle=65, vjust=0.6)) + labs(title="Histogram on Categorical Variable", 
-       subtitle="BGC Classes") 
+CARD_in_BIG<-ggplot(Clas_BGC_Count,aes(x = clase, y = cuentas))+ geom_boxplot() + theme(axis.text.x = element_text(angle=65, vjust=0.6)) + labs(title="Histogram on Categorical Variable", 
+       subtitle="BGC Classes") + theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=30),  # Y axis title
+            axis.text.x=element_text(size=30, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=30))  # Y axis text
+
+ggsave(file="CARD_in_BIG.png", plot=CARD_in_BIG, width=30, height=15)
 
 
 ```
+
+![CARD families in MIBiG classes](CARD_in_BIG.png)  
+
+From `r BGCs` different BGCs at MIBiG `r BGC_w_CARD` contains a CARD hit
+
 The following figure shows which CARD families are the most  populated classes in MiBIG database.
-
-
 and now an histogram by class with the number of BGCs with diferente frequecnies or CARd by color
 
 
