@@ -165,8 +165,7 @@ CARD_MIBiG_clas2<-merge(CARD_MIBiG_class, CARDFamiliesTable, by, by.x="Gen_ID_CA
 ## First of all, how many BGCs contain a hit in CARD 
 ## Count uniq BGCs
 
-ggplot(CARD_MIBiG_clas2,aes(clase)) + geom_bar(aes(fill=FO_Family), width = 0.5)
-+ theme(plot.title=element_text(size=20, 
+CARD_BIG_clases<-ggplot(CARD_MIBiG_clas2,aes(clase)) + geom_bar(aes(fill=FO_Family), width = 0.5) + theme(legend.position = "none",plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
@@ -176,6 +175,7 @@ ggplot(CARD_MIBiG_clas2,aes(clase)) + geom_bar(aes(fill=FO_Family), width = 0.5)
                                      angle = 90,
                                      vjust=.5),  # X axis text
             axis.text.y=element_text(size=10))  # Y axis text
+ggsave(file="CARD_BIG_clases.png", plot=CARD_BIG_clases, width=30, height=15)
 
 #+ geom_bar(aes(fill=FO_Family), width = 0.5)
 
@@ -193,7 +193,7 @@ theme_set(theme_classic())
 
 
 CARD_in_BIG<-ggplot(Clas_BGC_Count,aes(x = clase, y = cuentas))+ geom_boxplot() + theme(axis.text.x = element_text(angle=65, vjust=0.6)) + labs(title="Histogram on Categorical Variable", 
-       subtitle="BGC Classes") + theme(plot.title=element_text(size=20, 
+       subtitle="BGC Classes") + theme(legend.position = "none",plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
