@@ -59,7 +59,7 @@ These first five families, in a preliminar search corresponds to:
 | Family 1  	| 166	| class A extended-spectrum $\beta$-lactamase |   
 | Family 2	| 159 	| cephalosporin-hydrolyzing class C $\beta$ -lactamase |   
 | Family 3 	| 138 	| class A extended-spectrum $\beta$-lactamase |   
-| Family 4 	| 112 	| class D $\beta$-lactamase|   
+| Family 4 	| 112 	| class D $\beta$-lactamase Transpeptidase|   
   
 
 
@@ -150,11 +150,11 @@ There are `r BGCs` different BGCs reported at MIBiG distributed in several class
 # CARD families and their interaction with BGCs in MIBiG  
 
 ```{r CAARD_families_in_MIBiG, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
-CARD_vs_MIBiG_file="CARDquery.blast1"
+CARD_vs_MIBiG_file="CARDquery.blast1" #(Query card) vs MIBiG 
 CARD_vs_MIBiGTable <- read_delim(CARD_vs_MIBiG_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 #Cada renglón es una ocurrencia de un gen de la familia 1
 colnames(CARD_vs_MIBiGTable)=c("Gen_ID_CARD","CARD_SOURCE","BGC_ID","MIBIG_annotation","MIBIG_gen_Id")
-BGC_w_CARD<-length(unique(CARD_vs_MIBiGTable$BGC_ID))
+BGC_w_CARD<-length(unique(CARD_vs_MIBiGTable$BGC_ID)) # Number of times that BGC in MIBiG is hit of a Card gene
 
 ### Merging all tables in one
 CARD_MIBiG_class<-merge(CARD_vs_MIBiGTable, MIBiGTable, by, by.x="BGC_ID", by.y="BGC_ID", sort = TRUE)
@@ -162,45 +162,47 @@ CARD_MIBiG_FULL<-merge(CARD_MIBiG_class, CARDFamiliesTable, by, by.x="Gen_ID_CAR
 ```
 
 The following figure shows the most represented CARD families by MIBiG classes
+<!--
+# Which CARD class has more BGC hits
+# Family(I) = {f1,f2,....,fm}
+#Class (J)= {c1,c2,...ck}
+# The metric will be the average of hits of a BGC in a BGC class in a gen member of a CARD family 
+# Average (I,J) =(fi,cj)/((#FI)(#CJ))
+# The pairs that are blast hits of an element of a BGC Class in Elements of a CARD Family 
+#(Class,Family) /(#(Elemnts in class)(#Elements in family ) )
+!-->
+```{r CAARD_families_in_MIBiG, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE } 
+## asign to each triada of family, Class, BGC element, how many hits were found
+#sort.CARD_MIBiG_FULL<-CARD_MIBiG_FULL %>% group_by(FO_Family,clase,BGC_ID) %>%tally()
+sort.pairs.F_C<-CARD_MIBiG_FULL %>% group_by(FO_Family,secondary_ID_CARD,clase,BGC_ID) %>%tally()
 
-```{r CAARD_families_in_MIBiG, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
+## Counts uniq triadas  by Family
+#sort.by.family.CARD_MIBiG_FULL<-sort.CARD_MIBiG_FULL %>% group_by(FO_Family) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
 
-sort.CARD_MIBiG_FULL<-CARD_MIBiG_FULL %>% group_by(FO_Family,clase,BGC_ID) %>%tally()
-sort.by.family.CARD_MIBiG_FULL<-sort.CARD_MIBiG_FULL %>% group_by(FO_Family) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+sort.by.family.CARD_MIBiG_FULL<-sort.pairs.F_C %>% group_by(FO_Family,clase) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+# columna con numero de elementos de la familia que ocurre en ese renglon 
+which(sortCARD$FO_Family == sort.by.family.CARD_MIBiG_FULL$FO_Family)
+
+FamilyNumber <- function(x){ ## is a column
+  cuenta<-x
+  
+return(cuenta)
+}
+
+
+# funcion familia
+
+## PEnsar 
+sort.by.family.CARD_MIBiG_FULL$average=(sort.by.family.CARD_MIBiG_FULL$n)/(length(sort.by.family.CARD_MIBiG_FULL$FO_Family))*(length(sort.by.family.CARD_MIBiG_FULL$clase))
+# number of families 
 length(unique(sort.by.family.CARD_MIBiG_FULL$FO_Family))
+
+# First 16 families in CARD (Most abundant)
 First_10sort.by.family.CARD_MIBiG_FULL<-sortCARD[1:1084,]
 length(unique(First_10sort.by.family.CARD_MIBiG_FULL$FO_Family))
 
-ggplot(First_10sort.by.family.CARD_MIBiG_FULL,aes(FO_Family)) + geom_bar (width = 0.5) + theme(legend.position = "none",plot.title=element_text(size=20, 
-                                    face="bold", 
-                                    family="American Typewriter",
-                                    color="tomato",
-                                    lineheight=1.2),  # title
-            axis.title.y=element_text(size=10),  # Y axis title
-            axis.text.x=element_text(size=10, 
-                                     angle = 90,
-                                     vjust=.5),  # X axis text
-            axis.text.y=element_text(size=10))  # Y axis text
-
-####__________________________________________________________________________________________________
-
-#### Which are the CARD most represented families
-## Count uniq BGCs
-
-
-CARD_families_in_MIBiG<-ggplot(First_10sort.by.family.CARD_MIBiG_FULL,aes(FO_Family)) + geom_bar(aes(fill=clase), width = 0.5) + theme(legend.position = "none",plot.title=element_text(size=20, 
-                                    face="bold", 
-                                    family="American Typewriter",
-                                    color="tomato",
-                                    lineheight=1.2),  # title
-            axis.title.y=element_text(size=10),  # Y axis title
-            axis.text.x=element_text(size=10, 
-                                     angle = 90,
-                                     vjust=.5),  # X axis text
-            axis.text.y=element_text(size=10))  # Y axis text
-ggsave(file="CARD_families_in_MIBiG.png", plot=CARD_families_in_MIBiG, width=30, height=15)
-
 ```
+
 
 ![CARD families in MIBiG classes](CARD_families_in_MIBiG)  
 The following figure shows the average of CARD families by MIBiG classes
@@ -236,8 +238,13 @@ and now an histogram by class with the number of BGCs with diferente frequecnies
 ![CARD families in MIBiG classes](CARD_BIG_clases.png)  
 
 
-which CAARD families are over represented in MiBiG
 which MiBiG classes are over represented as CARD hits
+<!--
+# Which MiBig class has more CARD family hits
+# The metric will be the average of hits of a gene in a Family in a BGC in a BGC class
+# The pairs that are blast hits of an element of a CARD family in a BGC Class 
+#(Class,Family) /(#(Elemnts in class)(#Elements in family ) )
+!-->
 
 ```{r CAARD_vs_MiBIG_2, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
 ## Counting CARD FastOrthoFamilies per BGC
@@ -271,4 +278,4 @@ ggsave(file="CARD_in_BIG.png", plot=CARD_in_BIG, width=30, height=15)
 ```
 
 ![CARD families in MIBiG classes](CARD_in_BIG.png)  
-
+aaaaaqui voy
