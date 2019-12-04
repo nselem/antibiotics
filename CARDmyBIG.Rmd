@@ -161,8 +161,9 @@ CARD_MIBiG_class<-merge(CARD_vs_MIBiGTable, MIBiGTable, by, by.x="BGC_ID", by.y=
 CARD_MIBiG_FULL<-merge(CARD_MIBiG_class, CARDFamiliesTable, by, by.x="Gen_ID_CARD", by.y="Gen_ID_CARD", sort = TRUE)
 ```
 
-The following figure shows the most represented CARD families by MIBiG classes
-<!--
+The following analysis finds the most represented CARD families by MIBiG classes. An average about how many hits normalized by the family size and the number of BGCs elements of the class.
+
+<!-- 
 # Which CARD class has more BGC hits
 # Family(I) = {f1,f2,....,fm}
 #Class (J)= {c1,c2,...ck}
@@ -181,21 +182,35 @@ sort.pairs.F_C<-CARD_MIBiG_FULL %>% group_by(FO_Family,secondary_ID_CARD,clase,B
 
 sort.by.family.CARD_MIBiG_FULL<-sort.pairs.F_C %>% group_by(FO_Family,clase) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
 # columna con numero de elementos de la familia que ocurre en ese renglon 
-which(sortCARD$FO_Family == sort.by.family.CARD_MIBiG_FULL$FO_Family)
+sort.by.family.CARD_MIBiG_FULL$FO_Family
 
+
+### Function to obtain cardinality of a family
+#w<-"ORTHOMCL24 (12 genes,1 taxa):"
 FamilyNumber <- function(x){ ## is a column
-  cuenta<-x
-  
+  cuenta<-unique(sortCARD$n[which(sortCARD$FO_Family ==x)])
 return(cuenta)
 }
+#y<-FamilyNumber(w)
+#y
+## Creating a column with family cardinality 
+sort.by.family.CARD_MIBiG_FULL$FamilyCardinality<-lapply(sort.by.family.CARD_MIBiG_FULL$FO_Family,FamilyNumber)
 
+### Function to obtain cardinality of a class
+ClassNumber <- function(x){ ## is a column
+  elementos<-unique(sortMIBiG$n[which(sortMIBiG$clase ==x)])
+return(elementos)
+}
+## Creating a column with family cardinality 
+sort.by.family.CARD_MIBiG_FULL$ClaseCardinality<-lapply(sort.by.family.CARD_MIBiG_FULL$clase,ClassNumber)
 
-# funcion familia
-
-## PEnsar 
-sort.by.family.CARD_MIBiG_FULL$average=(sort.by.family.CARD_MIBiG_FULL$n)/(length(sort.by.family.CARD_MIBiG_FULL$FO_Family))*(length(sort.by.family.CARD_MIBiG_FULL$clase))
+## Obtaining the average 
+sort.by.family.CARD_MIBiG_FULL$average=(sort.by.family.CARD_MIBiG_FULL$n)/((as.numeric(sort.by.family.CARD_MIBiG_FULL$FamilyCardinality))*(as.numeric(sort.by.family.CARD_MIBiG_FULL$ClaseCardinality)))
 # number of families 
-length(unique(sort.by.family.CARD_MIBiG_FULL$FO_Family))
+#length(unique(sort.by.family.CARD_MIBiG_FULL$FO_Family))
+tail(sort.by.family.CARD_MIBiG_FULL$average)
+
+AverageFamily<-sort.by.family.CARD_MIBiG_FULL %>% group_by(FO_Family,clase,average) %>%tally()
 
 # First 16 families in CARD (Most abundant)
 First_10sort.by.family.CARD_MIBiG_FULL<-sortCARD[1:1084,]
@@ -203,6 +218,44 @@ length(unique(First_10sort.by.family.CARD_MIBiG_FULL$FO_Family))
 
 ```
 
+The following figure shows MIBiG Clases, and in each class stacks a CARD family average
+```{r CAARD_vs_MiBIG_family_average, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
+
+
+## First of all, how many BGCs contain a hit in CARD 
+## Count uniq BGCs
+
+ggplot(AverageFamily, aes(x = clase, y = average)) +geom_point(aes(color = FO_Family, size =  average))+ theme(legend.position = "none", plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=10),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
+
+
+
+ggplot(AverageFamily, aes(x = clase, y = average))+  geom_col(aes(fill = FO_Family), width = 0.7)+ theme(legend.position = "none", plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=10),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
+
+
+ggsave(file="CARD_BIG_family_average.png", plot=CARD_BIG_family_average, width=30, height=15)
+
+#+ geom_bar(aes(fill=FO_Family), width = 0.5)
+
+
+```
 
 ![CARD families in MIBiG classes](CARD_families_in_MIBiG)  
 The following figure shows the average of CARD families by MIBiG classes
@@ -245,6 +298,10 @@ which MiBiG classes are over represented as CARD hits
 # The pairs that are blast hits of an element of a CARD family in a BGC Class 
 #(Class,Family) /(#(Elemnts in class)(#Elements in family ) )
 !-->
+
+
+
+### OLD CODE
 
 ```{r CAARD_vs_MiBIG_2, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
 ## Counting CARD FastOrthoFamilies per BGC
