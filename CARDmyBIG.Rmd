@@ -100,7 +100,7 @@ BGCs<-length(unique(MIBiGTable$BGC_ID))
 sortMIBiG<-MIBiGTable %>% group_by(clase) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
 #First_10_MIBiG<-sortMIBiG[1:784,]
 #head(First_10_MIBiG)
-BIG_classes<-ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
+BIG_classes<-ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count", width = 0.7)+ theme(plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
@@ -111,7 +111,7 @@ BIG_classes<-ggplot(sortMIBiG, aes(clase))+ geom_histogram(stat="count")+ theme(
                                      vjust=.5),  # X axis text
             axis.text.y=element_text(size=30))  # Y axis text
 
-ggsave(file="BIG_classes.png", plot=BIG_classes, width=30, height=15)
+ggsave(file="BIG_classes.svg", plot=BIG_classes, width=30, height=15)
 
 ```
 ![MIBiG classes](BIG_classes.png)  
@@ -216,6 +216,21 @@ AverageFamily<-sort.by.family.CARD_MIBiG_FULL %>% group_by(FO_Family,clase,avera
 First_10sort.by.family.CARD_MIBiG_FULL<-sortCARD[1:1084,]
 length(unique(First_10sort.by.family.CARD_MIBiG_FULL$FO_Family))
 
+### In this comprised dataset by class ¿which was the most abundant family?
+ #Family of() max (average which class = ?))
+#    [max
+
+MaxFamily <- function(x){ ## is a column
+  ave<-AverageFamily$average[which(  AverageFamily$clase == x  )]
+max_ave<-which(ave==max(ave))
+max_fam<-AverageFamily$FO_Family[max_ave]
+return(max_fam)
+}
+
+maximos<-lapply(unique(sort.by.family.CARD_MIBiG_FULL$clase),MaxFamily)
+maximos
+#which(a==max(a))
+### In this comprised dataset by family ¿which was the most abundant class?
 ```
 
 The following figure shows MIBiG Clases, and in each class stacks a CARD family average
@@ -238,27 +253,71 @@ ggplot(AverageFamily, aes(x = clase, y = average)) +geom_point(aes(color = FO_Fa
 
 
 
-ggplot(AverageFamily, aes(x = clase, y = average))+  geom_col(aes(fill = FO_Family), width = 0.7)+ theme(legend.position = "none", plot.title=element_text(size=20, 
+CARD_BIG_family_average<-ggplot(AverageFamily, aes(x = clase, y = average))+  geom_col(aes(fill = FO_Family), width = 0.7)+ theme(legend.position = "none", plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
                                     lineheight=1.2),  # title
-            axis.title.y=element_text(size=10),  # Y axis title
-            axis.text.x=element_text(size=10, 
+            axis.title.y=element_text(size=40),  # Y axis title
+            axis.text.x=element_text(size=40, 
                                      angle = 90,
                                      vjust=.5),  # X axis text
-            axis.text.y=element_text(size=10))  # Y axis text
+            axis.text.y=element_text(size=40))  # Y axis text
 
 
-ggsave(file="CARD_BIG_family_average.png", plot=CARD_BIG_family_average, width=30, height=15)
+ggsave(file="CARD_BIG_family_average.svg", plot=CARD_BIG_family_average, width=30, height=15)
 
 #+ geom_bar(aes(fill=FO_Family), width = 0.5)
 
+
+## no w in facets
 
 ```
 
 ![CARD families in MIBiG classes](CARD_families_in_MIBiG)  
 The following figure shows the average of CARD families by MIBiG classes
+
+
+
+```{r familia_eje_X}
+CARD_BIG_family_averageHorizontal<-ggplot(AverageFamily, aes(x = FO_Family , y = average))+  geom_col(aes(fill = clase), width = 0.7)+ theme(legend.position = "right", plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=1),  # Y axis title
+            axis.text.x=element_text(size=1, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=1))  # Y axis text
+#ggsave(file="CARD_BIG_family_averageHorizontal.svg", plot=CARD_BIG_family_averageHorizontal, width=30, height=15)
+ggsave(file="CARD_BIG_family_averageHorizontal_with_leyend.svg", plot=CARD_BIG_family_averageHorizontal, width=30, height=15)
+
+#bb_AverageFamily <- match_df(AverageFamily, "AAA50325.1|ARO:3003036|oleB", on="id")
+## Now I want to substet the families with the highets average #3 
+# I look into inkscape to determine the 10 highest picks
+
+list<-c("AAA50325.1|ARO:3003036|oleB","AAV85982.1|ARO:3000535|macB","APB03219.1|ARO:3003986|TaeA","CAD70268.1|ARO:3002704|fexA","NP_388442.1|ARO:3004476|vmlR","ORTHOMCL108 (3 genes,2 taxa):","ORTHOMCL150 (2 genes,1 taxa):","ORTHOMCL165 (2 genes,1 taxa):","ORTHOMCL300 (2 genes,1 taxa):","ORTHOMCL65 (4 genes,2 taxa):","ORTHOMCL72 (4 genes,2 taxa):")
+#APB03216.1|ARO:3003982|LlmA
+### Now We substet this list
+#AverageFamily$FO_Family[which(
+#    AverageFamily$FO_Family == "AAA50325.1|ARO:3003036|oleB"|AverageFamily$FO_Family == "AAV85981.1|ARO:3000533|macA" | )]
+
+bb_AverageFamily <- AverageFamily[AverageFamily$FO_Family %in% list, ]
+CARD_BIG_family_averageHorizontalSubset<-  ggplot(bb_AverageFamily, aes(x = FO_Family , y = average))+  geom_col(aes(fill = clase), width = 0.7)+facet_grid(bb_AverageFamily$clase ~ .)+ theme(legend.position = "right", plot.title=element_text(size=50, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=20),  # Y axis title
+            axis.text.x=element_text(size=20, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=20))  # Y axis text
+ggsave(file="CARD_BIG_family_averageHorizontal_with_leyend_Subset.svg", plot=CARD_BIG_family_averageHorizontalSubset, width=30, height=15)
+
+```
+
 
 ```{r CAARD_vs_MiBIG, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
 
@@ -290,7 +349,6 @@ and now an histogram by class with the number of BGCs with diferente frequecnies
 
 ![CARD families in MIBiG classes](CARD_BIG_clases.png)  
 
-
 which MiBiG classes are over represented as CARD hits
 <!--
 # Which MiBig class has more CARD family hits
@@ -298,8 +356,6 @@ which MiBiG classes are over represented as CARD hits
 # The pairs that are blast hits of an element of a CARD family in a BGC Class 
 #(Class,Family) /(#(Elemnts in class)(#Elements in family ) )
 !-->
-
-
 
 ### OLD CODE
 
