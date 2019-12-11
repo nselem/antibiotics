@@ -252,7 +252,10 @@ FamilySpecificofClass<- function(x){ ## is a column
 }
 
 ClasesbyFamily<-lapply(unique(sort.by.family.CARD_MIBiG_FULL$FO_Family),FamilySpecificofClass)
-head(ClasesbyFamily[order( sapply(ClasesbyFamily,'[[',2))],50)
+## These families only hits one class
+head(ClasesbyFamily[order( sapply(ClasesbyFamily,'[[',2))],119)
+## These classes are the only hits of several families
+unique(sapply(head(ClasesbyFamily[order( sapply(ClasesbyFamily,'[[',2))],119),'[[',3))
 
 ```
 
