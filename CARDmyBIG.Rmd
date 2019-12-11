@@ -216,21 +216,44 @@ AverageFamily<-sort.by.family.CARD_MIBiG_FULL %>% group_by(FO_Family,clase,avera
 First_10sort.by.family.CARD_MIBiG_FULL<-sortCARD[1:1084,]
 length(unique(First_10sort.by.family.CARD_MIBiG_FULL$FO_Family))
 
-### In this comprised dataset by class ¿which was the most abundant family?
+### Q1 : In this comprised dataset by class ¿which was the most abundant family?
  #Family of() max (average which class = ?))
 #    [max
 
-MaxFamily <- function(x){ ## is a column
-  ave<-AverageFamily$average[which(  AverageFamily$clase == x  )]
-max_ave<-which(ave==max(ave))
-max_fam<-AverageFamily$FO_Family[max_ave]
-return(max_fam)
+MaxFamilybyClass <- function(x){ ## is a column
+  ave<-AverageFamily$average[which(  AverageFamily$clase == x )]
+  max_ave<-unique(ave[which(ave==max(ave))])
+  max_fam<-AverageFamily$FO_Family[which(AverageFamily$clase == x & AverageFamily$average == max_ave)]
+  return(c(x,max_ave,max_fam))
+}
+# Class, Max Average, #families with max average
+maximosbyClass<-lapply(unique(sort.by.family.CARD_MIBiG_FULL$clase),MaxFamilybyClass)
+maximosbyClass
+
+## Q2 which is the highest average by family and to which class corresponds
+##
+MaxClassbyFamily <- function(x){ ## is a column
+  ave<-AverageFamily$average[which(  AverageFamily$FO_Family == x )]
+  max_ave<-unique(ave[which(ave==max(ave))])
+  max_clase<-AverageFamily$clase[which(AverageFamily$FO_Family == x & AverageFamily$average == max_ave)]
+  
+  return(c(x,max_ave,max_clase))
 }
 
-maximos<-lapply(unique(sort.by.family.CARD_MIBiG_FULL$clase),MaxFamily)
-maximos
-#which(a==max(a))
-### In this comprised dataset by family ¿which was the most abundant class?
+maximosbyFamily<-lapply(unique(sort.by.family.CARD_MIBiG_FULL$FO_Family),MaxClassbyFamily)
+tail(maximosbyFamily[order( sapply(maximosbyFamily,'[[',2))])
+ 
+### Q3 Which families only hits one class, and the which class?? 
+
+FamilySpecificofClass<- function(x){ ## is a column
+  Clases<-AverageFamily$clase[which(  AverageFamily$FO_Family == x )]
+  NumberOfClases<-length(unique(Clases))
+  return(c(x,NumberOfClases,unique(Clases)))
+}
+
+ClasesbyFamily<-lapply(unique(sort.by.family.CARD_MIBiG_FULL$FO_Family),FamilySpecificofClass)
+head(ClasesbyFamily[order( sapply(ClasesbyFamily,'[[',2))],50)
+
 ```
 
 The following figure shows MIBiG Clases, and in each class stacks a CARD family average
