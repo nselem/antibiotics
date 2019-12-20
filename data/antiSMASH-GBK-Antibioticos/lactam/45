@@ -1,0 +1,110 @@
+LOCUS       NZ_LIRJ01000602         1860 bp    DNA     linear   CON 03-APR-2018
+DEFINITION  Streptomyces silaceus strain NRRL B-24166 B24166_contig_602, whole
+            genome shotgun sequence.
+ACCESSION   NZ_LIRJ01000602
+VERSION     NZ_LIRJ01000602
+KEYWORDS    .
+SOURCE      Streptomyces silaceus
+  ORGANISM  Streptomyces silaceus
+            Bacteria; Actinobacteria; Streptomycetales; Streptomycetaceae;
+            Streptomyces.
+FEATURES             Location/Qualifiers
+     source          1..1860
+                     /organism="Streptomyces silaceus"
+                     /mol_type="genomic DNA"
+                     /strain="NRRL B-24166"
+                     /isolation_source="placenta"
+                     /host="Equine"
+                     /culture_collection="NRRL:B-24166"
+                     /db_xref="taxon:545123"
+                     /country="USA: Lexington, KY"
+                     /collection_date="1999"
+     cluster         1..1860
+                     /note="Cluster number: 45"
+                     /note="Detection rule(s) for this cluster type: blactam:
+                     (BLS or CAS or tabtoxin);"
+                     /cutoff=20000
+                     /extension=10000
+                     /product="blactam"
+                     /contig_edge="True"
+                     /knownclusterblast="1. BGC0000845_c1	Clavulanic acid (8% of
+                     genes show similarity)"
+                     /knownclusterblast="2. BGC0001151_c1	Clavams (12% of genes
+                     show similarity)"
+     gene            59..1009
+                     /gene="speB"
+                     /locus_tag="AOK22_RS37465"
+     CDS             59..1009
+                     /gene="speB"
+                     /locus_tag="AOK22_RS37465"
+                     /inference="COORDINATES: similar to AA
+                     sequence:RefSeq:WP_018090802.1"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: Protein Homology."
+                     /codon_start=1
+                     /transl_table=11
+                     /product="agmatinase"
+                     /protein_id="WP_055703122.1"
+                     /translation="MERIDTTVSPRYAQIPTFMRLPHDPAPHGKDVVVIGAPYDGGTSY
+                     RPGARFGPRAVRNESGLIHGVGIDRGPGTFDLIDCVDAGDIDLTPFNMHIAMATAEERL
+                     SALLVDNAAFLMLGGDHSLTLPALRAVAGRHGPVAVLHLDAHSDTNPAFYGGEYHHGTP
+                     FRHAIEEKLVDPERMVQIGIRGHNPRPDSLDYARGHGVRIVTSDEFCRLGTEGAQRLVR
+                     ARVGDGPVYVSVDIDVVDPAFAPGTGTPAPGGPTSREVLALLRGVGDLRPVGCDVMEVS
+                     PLYDHGGITSVLATEIGAELLYQYARAHSRERTSS"
+     gene            1006..>1860
+                     /locus_tag="AOK22_RS37470"
+     CDS             1006..>1860
+                     /locus_tag="AOK22_RS37470"
+                     /inference="COORDINATES: similar to AA
+                     sequence:RefSeq:WP_014152698.1"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: Protein Homology."
+                     /note="smCOG: SMCOG1046:Dioxygenase_TauD/TfdA (Score: 44.8;
+                     E-value: 4.5e-12);"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="clavaminate synthase"
+                     /protein_id="WP_055703121.1"
+                     /translation="MTVLDCSAHAADLLASAGRLPRIPRSDIHGFLDAARTAADALPTP
+                     LAAALDDFNADGNQDGYLLLRGLPVEDDDALPRTPDSTPAPVDRPLLNQEAMLALVGRR
+                     LGLHTGYRELRSATVYHDVYPSPGAHYLSSETSETLLEFHTEMAYHVRQPNYVMLACSR
+                     ADHEREAATLVGSVRKALPLLPDDVRARLFDRPLPCRVDVAFRGGVDDPGAIADVKPLY
+                     GDPEDPFLGYDRELLAPRDAADIEAVSVLSKALDEVREAVYLVPGDLLIVDNFRTTHAR
+                     TPDH"
+                     /sec_met="Type: blactam"
+                     /sec_met="Domains detected: CAS (E-value: 1.5e-157,
+                     bitscore: 511.0, seeds: 7)"
+                     /sec_met="Kind: biosynthetic"
+ORIGIN
+        1 ccgcgaccgc accgccccac ggctgggcga cggtccgcac aggaagggag ggaccgccgt
+       61 ggaacgcatc gacaccacgg tctcgccgcg ctacgcgcag atccccacgt tcatgcgcct
+      121 gccgcacgac ccggcacccc acggcaagga cgtcgtggtc atcggcgccc cctacgacgg
+      181 cggcacgagc taccggcccg gagcgcgctt cgggccacgc gccgtgcgca atgagtccgg
+      241 gctcatccac ggcgtgggca tcgaccgcgg gcccggcacc ttcgacctga tcgactgcgt
+      301 cgacgcgggg gacatcgacc tgaccccgtt caacatgcac atcgccatgg ccacggccga
+      361 ggagagactc agcgctctcc tcgtcgacaa cgcggccttc ctcatgctcg gcggcgacca
+      421 ctcgctgacg ctgcccgcgc tgcgcgccgt cgcgggccgg cacgggccgg tcgccgtcct
+      481 gcacctggac gcgcactccg acaccaaccc cgccttctac ggcggcgagt accaccacgg
+      541 cacgcccttc cggcacgcca tcgaagagaa gctcgtcgac ccggagcgca tggtgcagat
+      601 cgggatccgc ggccacaacc cgcggcccga ctcactcgac tacgcccgtg gccacggcgt
+      661 gcggatcgtc acctccgacg agttctgccg gctcggcacc gagggcgccc agcggctggt
+      721 ccgcgcccgc gtcggtgacg ggccggtgta cgtgtcggtg gacatcgacg tcgtggaccc
+      781 ggcgttcgcg ccgggcaccg gcacgcccgc cccgggcggc cccacctcgc gcgaggtgct
+      841 cgccctgctg cgcggcgtcg gtgatctgcg gcccgtggga tgcgacgtca tggaggtgtc
+      901 gccgctgtac gaccacggcg gcatcacctc cgtcctggcc accgaaatcg gcgcggagct
+      961 gctgtaccag tacgcccgcg cccactcccg agaaaggact tcctcatgac cgtgctcgac
+     1021 tgctccgcgc acgccgcgga cctgctggcg tcggccggac ggctgccgcg gattccccgt
+     1081 tccgacatcc atgggttcct ggacgcggcg cgcacggccg ccgacgcgct ccccacccct
+     1141 ttggcggcgg cgctggacga cttcaacgcc gacggcaacc aggacggata cctgctcctg
+     1201 cgcggcctgc cggtggagga cgacgacgcc ctgccccgca cccccgacag cacacccgcg
+     1261 cccgtggacc ggccgttgct gaaccaggag gccatgctcg ccctcgtcgg ccgccgcctc
+     1321 ggcctgcaca ccggctaccg cgagctgcgc tccgccaccg tgtaccacga cgtctatccg
+     1381 tcgcccggtg cgcactacct ctcctccgag acctccgaga ccctgctgga gttccacacg
+     1441 gagatggcct accacgtgcg ccagccgaac tacgtgatgc tcgcctgctc ccgggcggac
+     1501 cacgagcgcg aggcggccac cctcgtcggg tcggtccgca aggcgctgcc gctgctcccg
+     1561 gacgacgtcc gcgcccgcct cttcgacagg cccctgccct gccgcgtgga cgtcgccttc
+     1621 cgcgggggcg tcgacgaccc gggagcgata gccgacgtca agcccctcta cggcgacccg
+     1681 gaggacccgt tcctcggcta cgaccgcgag ttgctggcgc cccgggacgc cgccgacatc
+     1741 gaggccgtct ccgtcctctc gaaggccctg gacgaagtac gcgaggccgt gtacctggtc
+     1801 ccgggtgacc tgctgatcgt ggacaacttc cgtacgacgc acgcccgtac gcccgatcat
+//

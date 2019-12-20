@@ -311,10 +311,6 @@ The following figure shows MIBiG Clases, and in each class stacks a CARD family 
 ## First of all, how many BGCs contain a hit in CARD 
 ## Count uniq BGCs
 
-AverageFamily$average <- reorder(AverageFamily$average,AverageFamily$average,FUN=length)
-levels(AverageFamily$average)
-sort(table(AverageFamily$average))
-
 ggplot(AverageFamily, aes(x = clase, y = average)) +geom_point(aes(color = FO_Family, size =  average))+ theme(legend.position = "none", plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
@@ -329,7 +325,7 @@ ggplot(AverageFamily, aes(x = clase, y = average)) +geom_point(aes(color = FO_Fa
 
 
 
-CARD_BIG_family_average<-ggplot(AverageFamily, aes(x = clase, y = average))+  geom_col(aes(fill = FO_Family), width = 0.7)+ theme(legend.position = "none", plot.title=element_text(size=20, 
+CARD_BIG_family_average<-ggplot(AverageFamily, aes(x = clase, y = average))+  geom_col(aes(fill = FO_Family), width = 0.7)+ theme(legend.position = "right", plot.title=element_text(size=20, 
                                     face="bold", 
                                     family="American Typewriter",
                                     color="tomato",
