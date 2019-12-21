@@ -1,0 +1,414 @@
+---
+title: "Antibiotic resistance genes thta occur in Biosynthetic gene clusters"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(ggplot2)
+library(plyr)
+library( reshape )
+library(data.table)
+library(easyGgplot2)
+
+library(dplyr)
+```
+
+## DATA  
+CARD database contains antibiotic resistance (AR) genes.  
+glycosides database is composed by Biosynthetic gene clusters.  
+antiSMASHDB contains predicted BGCs.  
+
+## Methodology
+### CARD gene families  
+Genes in CARD were classified into gene families using FastORTHO with default parameters.    
+
+### Homology searches between CARD and glycosides  
+Homology search was conducted using blast (e-vaule ) in an all vs all comparison with query antibiotic resistance genes from The Comprehensive Antibiotic Resistance Database (CARD) against genes in BGCs from glycosides database.  
+
+In the following sections we will refer to the following questions: How many BGCs contain an AR gene?
+¿How many families of AR genes are present in BGCs? Which families are over represented? How many BGCs per AR gene/Family?
+
+
+
+# Protein families in CARD  
+The following figure shows the most populated families in CARD database.
+```{r FO_reading_families_CARD, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE}
+#CAARD_file="CARD.FO.families"
+CAARD_file="data/FAST.ORTHO.PFAM"
+
+Pre_CARDFamiliesTable <- read_delim(CAARD_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+colnames(Pre_CARDFamiliesTable)=c("Gen_ID_CARD","secondary_ID_CARD","FO_Family","oldfamily")
+#head(CARDFamiliesTable)
+CARDFamiliesTable<-subset(Pre_CARDFamiliesTable, FO_Family!="none")
+#Gen_Id, Familia (según fastOrtho)
+## Counting number of families 
+AllFamilies<-length(unique(CARDFamiliesTable$FO_Family))
+WO_singletons<-length(grep("ORTHO", unique(CARDFamiliesTable$FO_Family)))
+sort(table(CARDFamiliesTable$FO_Family))
+
+```
+
+The total number of antibiotic gene resistance families is `r AllFamilies` counting singletons. Without singletons there are `r WO_singletons` families.
+
+
+<!--- Dany is currently classifing families by two methods hmmscan (pfam domains) and blasting their members -->
+These first five families, in a preliminar search corresponds to:  
+  
+|  Family	| Number of genes	| Annotation|    
+|---	|---	|---  |    
+| Family 0 	| 647 	|$\beta$-glycosidesase 2 |   
+| Family 1  	| 302	| $\beta$-glycosidesase |   
+| Family 2	| 283 	| Transpeptidase     |   
+| Family 3 	| 103 	| class B extended-spectrum $\beta$-glycosidesase |   
+| Family 4 	| 55 	| MFS_1|   
+  
+
+
+```{r FO_families_CARD, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE}
+#Cada renglón es una ocurrencia de un gen de la familia 
+#CARDFamiliesTable$FO_Family
+sortCARD<-CARDFamiliesTable %>% group_by(FO_Family) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+sortCARD
+First_10<-sortCARD[1:1582,]
+tail(First_10)
+
+First_10$FO_Family <- reorder(First_10$FO_Family,First_10$FO_Family,FUN=length)
+levels(First_10$FO_Family)
+sort(table(First_10$FO_Family))
+
+
+CARD_bars<-ggplot(First_10, aes(FO_Family))+ geom_histogram(stat="count")+ theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=35),  # Y axis title
+            axis.text.x=element_text(size=30, 
+                                     angle = 30,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=30))  # Y axis text
+ggsave(file="results/CARD_bars.svg", plot=CARD_bars, width=30, height=15)
+#![CARD families](CARD_bars.png)  
+
+```
+
+
+
+# BGC genuss in glycosides  
+The following figure shows the most populated sources in glycosides DB.
+
+```{r glycosides, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE}
+glycosides_file="data/glycosides.meta"
+glycosides_table <- read_delim(glycosides_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+#Gen_Id, Familia (según fastOrtho)
+#Cada renglón es una ocurrencia de un gen de la familia 1
+colnames(glycosides_table)=c("glycosides_gen_Id","BGC_ID","genus","full_source")
+BGCs<-length(unique(glycosides_table$BGC_ID))
+
+sortglycosides<-glycosides_table %>% group_by(genus) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+sortglycosides$genus <- reorder(sortglycosides$genus,sortglycosides$genus,FUN=length)
+levels(sortglycosides$genus)
+sort(table(sortglycosides$genus))
+
+#First_10_glycosides<-sortglycosides[1:784,]
+#head(First_10_glycosides)
+
+
+glycosides_genus<-ggplot(sortglycosides, aes(genus))+ geom_histogram(stat="count", width = 0.7)+ theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=30),  # Y axis title
+            axis.text.x=element_text(size=30, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=30))  # Y axis text
+
+
+ggsave(file="results/glycosides_genus.svg", plot=glycosides_genus, width=30, height=15)
+
+```
+![glycosides classes](glycosides_classes.png)  
+
+There are `r BGCs` different BGCs reported as glycosides producers from antiSMASH-DB distributed in  several sources
+
+
+\newpage
+
+Average of blast hits of the family $f$ over the source $c$ where normalized by the size of these sets, $\#f$ and $\#c$ represent the number of elements in family $f$ and source $c$ respectively.
+
+```{r CAARD_families_in_glycosides, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
+CARD_vs_glycosides_file="data/CARDquery_glycosidesDB.blast1" #(Query card) vs glycosides 
+CARD_vs_glycosides_table <- read_delim(CARD_vs_glycosides_file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+#Cada renglón es una ocurrencia de un gen de la familia 1
+colnames(CARD_vs_glycosides_table)=c("Gen_ID_CARD","CARD_SOURCE","glycosides_gen_Id")
+BGC_w_CARD<-length(unique(CARD_vs_glycosides_table$BGC_ID)) # Number of times that BGC in glycosides is hit of a Card gene
+
+### Merging all tables in one
+CARD_glycosides_class<-merge(CARD_vs_glycosides_table, glycosides_table, by, by.x="glycosides_gen_Id", by.y="glycosides_gen_Id", sort = TRUE)
+CARD_glycosides_FULL<-merge(CARD_glycosides_class, CARDFamiliesTable, by, by.x="Gen_ID_CARD", by.y="Gen_ID_CARD", sort = TRUE)
+```
+
+The following analysis finds the most represented CARD families by glycosides classes. An average about how many hits normalized by the family size and the number of BGCs elements of the class.
+
+<!-- 
+# Which CARD class has more BGC hits
+# Family(I) = {f1,f2,....,fm}
+#Class (J)= {c1,c2,...ck}
+# The metric will be the average of hits of a BGC in a BGC class in a gen member of a CARD family 
+# Average (I,J) =(fi,cj)/((#FI)(#CJ))
+# The pairs that are blast hits of an element of a BGC Class in Elements of a CARD Family 
+#(Class,Family) /(#(Elemnts in class)(#Elements in family ) )
+!-->
+```{r CAARD_families_in_glycosides_2, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE } 
+## asign to each triada of family, Class, BGC element, how many hits were found
+#sort.CARD_glycosides_FULL<-CARD_glycosides_FULL %>% group_by(FO_Family,genus,BGC_ID) %>%tally()
+sort.pairs.F_C<-CARD_glycosides_FULL %>% group_by(FO_Family,secondary_ID_CARD,genus,BGC_ID) %>%tally()
+
+## Counts uniq triadas  by Family
+#sort.by.family.CARD_glycosides_FULL<-sort.CARD_glycosides_FULL %>% group_by(FO_Family) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+
+sort.by.family.CARD_glycosides_FULL<-sort.pairs.F_C %>% group_by(FO_Family,genus) %>% mutate(n=n())%>% ungroup() %>% arrange(-n)
+# columna con numero de elementos de la familia que ocurre en ese renglon 
+sort.by.family.CARD_glycosides_FULL$FO_Family
+
+
+### Function to obtain cardinality of a family
+#w<-"ORTHOMCL24 (12 genes,1 taxa):"
+FamilyNumber <- function(x){ ## is a column
+  cuenta<-unique(sortCARD$n[which(sortCARD$FO_Family ==x)])
+return(cuenta)
+}
+#y<-FamilyNumber(w)
+#y
+## Creating a column with family cardinality 
+sort.by.family.CARD_glycosides_FULL$FamilyCardinality<-lapply(sort.by.family.CARD_glycosides_FULL$FO_Family,FamilyNumber)
+
+### Function to obtain cardinality of a class
+ClassNumber <- function(x){ ## is a column
+  elementos<-unique(sortglycosides$n[which(sortglycosides$genus ==x)])
+return(elementos)
+}
+## Creating a column with family cardinality 
+sort.by.family.CARD_glycosides_FULL$genusCardinality<-lapply(sort.by.family.CARD_glycosides_FULL$genus,ClassNumber)
+
+## Obtaining the average 
+sort.by.family.CARD_glycosides_FULL$average=(sort.by.family.CARD_glycosides_FULL$n)/((as.numeric(sort.by.family.CARD_glycosides_FULL$FamilyCardinality))*(as.numeric(sort.by.family.CARD_glycosides_FULL$genusCardinality)))
+# number of families 
+#length(unique(sort.by.family.CARD_glycosides_FULL$FO_Family))
+tail(sort.by.family.CARD_glycosides_FULL$average)
+
+AverageFamily<-sort.by.family.CARD_glycosides_FULL %>% group_by(FO_Family,genus,average) %>%tally()
+
+# First 16 families in CARD (Most abundant)
+First_10sort.by.family.CARD_glycosides_FULL<-sortCARD[1:1084,]
+length(unique(First_10sort.by.family.CARD_glycosides_FULL$FO_Family))
+
+### Q1 : In this comprised dataset by class ¿which was the most abundant family?
+ #Family of() max (average which class = ?))
+#    [max
+
+MaxFamilybyClass <- function(x){ ## is a column
+  ave<-AverageFamily$average[which(  AverageFamily$genus == x )]
+  max_ave<-unique(ave[which(ave==max(ave))])
+  max_fam<-AverageFamily$FO_Family[which(AverageFamily$genus == x & AverageFamily$average == max_ave)]
+  return(c(x,max_ave,max_fam))
+}
+# Class, Max Average, #families with max average
+maximosbyClass<-lapply(unique(sort.by.family.CARD_glycosides_FULL$genus),MaxFamilybyClass)
+maximosbyClass
+
+## Q2 which is the highest average by family and to which class corresponds
+##
+MaxClassbyFamily <- function(x){ ## is a column
+  ave<-AverageFamily$average[which(  AverageFamily$FO_Family == x )]
+  max_ave<-unique(ave[which(ave==max(ave))])
+  max_genus<-AverageFamily$genus[which(AverageFamily$FO_Family == x & AverageFamily$average == max_ave)]
+  return(c(x,max_ave,max_genus))
+}
+
+maximosbyFamily<-lapply(unique(sort.by.family.CARD_glycosides_FULL$FO_Family),MaxClassbyFamily)
+maximosbyFamily[order( sapply(maximosbyFamily,'[[',2))]
+ 
+### Q3 Which families only hits one class, and the which class?? 
+
+FamilySpecificofClass<- function(x){ ## is a column
+  genuss<-AverageFamily$genus[which(  AverageFamily$FO_Family == x )]
+  NumberOfgenuss<-length(unique(genuss))
+  return(c(x,NumberOfgenuss,unique(genuss)))
+}
+
+genussbyFamily<-lapply(unique(sort.by.family.CARD_glycosides_FULL$FO_Family),FamilySpecificofClass)
+## These families only hits one class
+head(genussbyFamily[order( sapply(genussbyFamily,'[[',2))],119)
+## These classes are the only hits of several families
+unique(sapply(head(genussbyFamily[order(sapply(genussbyFamily,'[[',2))],119),'[[',3))
+
+```
+
+The following figure shows glycosides genuss, and in each class stacks a CARD family average
+```{r CAARD_vs_glycosides_family_average, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
+
+
+## First of all, how many BGCs contain a hit in CARD 
+## Count uniq BGCs
+
+ggplot(AverageFamily, aes(x = genus, y = average)) +geom_point(aes(color = FO_Family, size =  average))+ theme(legend.position = "none", plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=10),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
+
+
+
+
+CARD_glycosides_family_average<-ggplot(AverageFamily, aes(x = genus, y = average))+  geom_col(aes(fill = FO_Family), width = 0.7)+ theme(legend.position = "right", plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=40),  # Y axis title
+            axis.text.x=element_text(size=40, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=40))  # Y axis text
+
+
+ggsave(file="results/CARD_glycosides_family_average.svg", plot=CARD_glycosides_family_average, width=30, height=15)
+
+#+ geom_bar(aes(fill=FO_Family), width = 0.5)
+
+
+## no w in facets
+
+```
+
+![CARD families in glycosides classes](CARD_families_in_glycosides)  
+The following figure shows the average of CARD families by glycosides classes
+
+
+
+```{r familia_eje_X, eval=FALSE}
+CARD_glycosides_family_averageHorizontal<-ggplot(AverageFamily, aes(x = FO_Family , y = average))+  geom_col(aes(fill = genus), width = 0.7)+ theme(legend.position = "right", plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=1),  # Y axis title
+            axis.text.x=element_text(size=1, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=1))  # Y axis text
+#ggsave(file="CARD_glycosides_family_averageHorizontal.svg", plot=CARD_glycosides_family_averageHorizontal, width=30, height=15)
+ggsave(file="results/CARD_glycosides_family_averageHorizontal_with_leyend.svg", plot=CARD_glycosides_family_averageHorizontal, width=30, height=15)
+
+#bb_AverageFamily <- match_df(AverageFamily, "AAA50325.1|ARO:3003036|oleB", on="id")
+## Now I want to substet the families with the highets average #3 
+# I look into inkscape to determine the 10 highest picks
+
+list<-c("AAA50325.1|ARO:3003036|oleB","AAV85982.1|ARO:3000535|macB","APB03219.1|ARO:3003986|TaeA","CAD70268.1|ARO:3002704|fexA","NP_388442.1|ARO:3004476|vmlR","ORTHOMCL108 (3 genes,2 taxa):","ORTHOMCL150 (2 genes,1 taxa):","ORTHOMCL165 (2 genes,1 taxa):","ORTHOMCL300 (2 genes,1 taxa):","ORTHOMCL65 (4 genes,2 taxa):","ORTHOMCL72 (4 genes,2 taxa):")
+#APB03216.1|ARO:3003982|LlmA
+### Now We substet this list
+#AverageFamily$FO_Family[which(
+#    AverageFamily$FO_Family == "AAA50325.1|ARO:3003036|oleB"|AverageFamily$FO_Family == "AAV85981.1|ARO:3000533|macA" | )]
+
+bb_AverageFamily <- AverageFamily[AverageFamily$FO_Family %in% list, ]
+CARD_glycosides_family_averageHorizontalSubset<-  ggplot(bb_AverageFamily, aes(x = FO_Family , y = average))+  geom_col(aes(fill = genus), width = 0.7)+facet_grid(bb_AverageFamily$genus ~ .)+ theme(legend.position = "right", plot.title=element_text(size=50, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=20),  # Y axis title
+            axis.text.x=element_text(size=20, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=20))  # Y axis text
+ggsave(file="CARD_glycosides_family_averageHorizontal_with_leyend_Subset.svg", plot=CARD_glycosides_family_averageHorizontalSubset, width=30, height=15)
+
+```
+
+
+```{r CAARD_vs_glycosides, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
+
+
+## First of all, how many BGCs contain a hit in CARD 
+## Count uniq BGCs
+
+CARD_glycosides_genuss<-ggplot(CARD_glycosides_FULL,aes(genus)) + geom_bar(aes(fill=FO_Family), width = 0.5) + theme(legend.position = "none",plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=10),  # Y axis title
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=10))  # Y axis text
+ggsave(file="CARD_glycosides_genuss.png", plot=CARD_glycosides_genuss, width=30, height=15)
+
+#+ geom_bar(aes(fill=FO_Family), width = 0.5)
+
+
+```
+
+From `r BGCs` different BGCs at glycosides `r BGC_w_CARD` contains a CARD hit
+
+The following figure shows which CARD families are the most  populated classes in glycosides database.
+and now an histogram by class with the number of BGCs with diferente frequecnies or CARd by color
+
+![CARD families in glycosides classes](CARD_glycosides_genuss.png)  
+
+which glycosides classes are over represented as CARD hits
+<!--
+# Which glycosides class has more CARD family hits
+# The metric will be the average of hits of a gene in a Family in a BGC in a BGC class
+# The pairs that are blast hits of an element of a CARD family in a BGC Class 
+#(Class,Family) /(#(Elemnts in class)(#Elements in family ) )
+!-->
+!-->
+### OLD CODE
+
+```{r CAARD_vs_glycosides_2, echo=FALSE,message=FALSE, include=FALSE, results='hide', warnings=FALSE }
+## Counting CARD FastOrthoFamilies per BGC
+cuentas<-count(CARD_glycosides_FULL %>% group_by(BGC_ID,FO_Family) %>% tally())
+colnames(cuentas)=c("BGC_ID","cuentas")
+head(cuentas)
+## Here are in cuentas the number of FASTORTHO CARD families per BGC  
+CARD_glycosides_todo<-merge(CARD_glycosides_FULL, cuentas, by, by.x="BGC_ID", by.y="BGC_ID", sort = TRUE)
+
+##Now I wan thre columns class, BGC , # CARD families
+Clas_BGC_Count<-CARD_glycosides_todo %>% group_by(genus,BGC_ID,cuentas) %>% tally()
+head (Clas_BGC_Count,100)
+theme_set(theme_classic())
+
+
+CARD_in_glycosides<-ggplot(Clas_BGC_Count,aes(x = genus, y = cuentas))+ geom_boxplot() + theme(axis.text.x = element_text(angle=65, vjust=0.6)) + labs(title="Histogram on Categorical Variable", 
+       subtitle="BGC Classes") + theme(legend.position = "none",plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    lineheight=1.2),  # title
+            axis.title.y=element_text(size=30),  # Y axis title
+            axis.text.x=element_text(size=30, 
+                                     angle = 90,
+                                     vjust=.5),  # X axis text
+            axis.text.y=element_text(size=30))  # Y axis text
+
+ggsave(file="CARD_in_glycosides.png", plot=CARD_in_glycosides, width=30, height=15)
+
+
+```
+
+![CARD families in glycosides classes](CARD_in_glycosides.png)  
+aaaaaqui voy
